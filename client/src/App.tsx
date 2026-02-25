@@ -4,7 +4,9 @@ import {
   Flame, Search, Plus, Bell, Trash2, 
   ExternalLink, RefreshCw, X, Check, AlertTriangle,
   Zap, TrendingUp, Twitter, Globe, Eye, Activity, Clock, Target,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight,
+  MessageCircle, Repeat2, Quote, User, Shield, ShieldAlert,
+  ChevronDown, ChevronUp, ChevronsUpDown, ThermometerSun, FileText
 } from 'lucide-react';
 import { 
   keywordsApi, hotspotsApi, notificationsApi, triggerHotspotCheck,
@@ -17,7 +19,31 @@ import { BackgroundBeams } from './components/ui/background-beams';
 import { Meteors } from './components/ui/meteors';
 import FilterSortBar, { defaultFilterState, type FilterState } from './components/FilterSortBar';
 import { sortHotspots } from './utils/sortHotspots';
+import { relativeTime, formatDateTime } from './utils/relativeTime';
 // TextGenerateEffect available for future use
+
+/** 计算热度综合指标（归一化 0-100） */
+function calcHeatScore(h: Hotspot): number {
+  const likes = h.likeCount ?? 0;
+  const retweets = h.retweetCount ?? 0;
+  const replies = h.replyCount ?? 0;
+  const comments = h.commentCount ?? 0;
+  const quotes = h.quoteCount ?? 0;
+  const views = h.viewCount ?? 0;
+  // 加权公式：转发最重、其次点赞、然后评论/回复
+  const raw = likes * 2 + retweets * 3 + replies * 1.5 + comments * 1.5 + quotes * 2 + views / 100;
+  // log 压缩到 0-100
+  if (raw <= 0) return 0;
+  return Math.min(100, Math.round(Math.log10(raw + 1) * 25));
+}
+
+function getHeatLevel(score: number): { label: string; color: string } {
+  if (score >= 80) return { label: '爆', color: 'text-red-400' };
+  if (score >= 60) return { label: '热', color: 'text-orange-400' };
+  if (score >= 40) return { label: '温', color: 'text-amber-400' };
+  if (score >= 20) return { label: '凉', color: 'text-blue-400' };
+  return { label: '冷', color: 'text-slate-500' };
+}
 
 function App() {
   const [keywords, setKeywords] = useState<Keyword[]>([]);
@@ -38,6 +64,10 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchResults, setSearchResults] = useState<Hotspot[]>([]);
+  // 展开/折叠状态
+  const [expandedReasons, setExpandedReasons] = useState<Set<string>>(new Set());
+  const [expandedContents, setExpandedContents] = useState<Set<string>>(new Set());
+  const [allReasonsExpanded, setAllReasonsExpanded] = useState(false);
 
   // 加载数据
   const loadData = useCallback(async () => {
@@ -190,6 +220,34 @@ function App() {
     } catch (error) {
       console.error('Failed to mark as read:', error);
     }
+  };
+
+  // 展开/折叠相关性理由
+  const toggleReason = (id: string) => {
+    setExpandedReasons(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  // 展开/折叠原始内容
+  const toggleContent = (id: string) => {
+    setExpandedContents(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  // 一键展开/折叠所有相关性理由
+  const toggleAllReasons = (list: Hotspot[]) => {
+    if (allReasonsExpanded) {
+      setExpandedReasons(new Set());
+    } else {
+      setExpandedReasons(new Set(list.filter(h => h.relevanceReason).map(h => h.id)));
+    }
+    setAllReasonsExpanded(!allReasonsExpanded);
   };
 
   // Client-side filtering/sorting for search results
@@ -513,20 +571,36 @@ function App() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {hotspots.map((hotspot, index) => (
+                  {/* 一键展开/折叠所有理由 */}
+                  {hotspots.some(h => h.relevanceReason) && (
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => toggleAllReasons(hotspots)}
+                        className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
+                      >
+                        <ChevronsUpDown className="w-3.5 h-3.5" />
+                        {allReasonsExpanded ? '折叠所有理由' : '展开所有理由'}
+                      </button>
+                    </div>
+                  )}
+
+                  {hotspots.map((hotspot, index) => {
+                    const heatScore = calcHeatScore(hotspot);
+                    const heat = getHeatLevel(heatScore);
+                    return (
                     <motion.div
                       key={hotspot.id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="group p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-white/10 transition-all cursor-pointer"
+                      className="group p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-white/10 transition-all"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
-                          {/* Meta */}
-                          <div className="flex items-center gap-2 mb-3">
+                          {/* Row 1: Meta badges */}
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
                             <span className={cn(
-                              "px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wider",
+                              "px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wider flex items-center",
                               hotspot.importance === 'urgent' && "bg-red-500/15 text-red-400 border border-red-500/20",
                               hotspot.importance === 'high' && "bg-orange-500/15 text-orange-400 border border-orange-500/20",
                               hotspot.importance === 'medium' && "bg-amber-500/15 text-amber-400 border border-amber-500/20",
@@ -544,6 +618,36 @@ function App() {
                                 {hotspot.keyword.text}
                               </span>
                             )}
+                            {/* 真实性标记 */}
+                            {!hotspot.isReal && (
+                              <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20">
+                                <ShieldAlert className="w-3 h-3" />
+                                可疑
+                              </span>
+                            )}
+                            {hotspot.isReal && hotspot.relevance >= 80 && (
+                              <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <Shield className="w-3 h-3" />
+                                可信
+                              </span>
+                            )}
+                            {hotspot.keywordMentioned === true && (
+                              <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                <Target className="w-3 h-3" />
+                                直接提及
+                              </span>
+                            )}
+                            {hotspot.keywordMentioned === false && (
+                              <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                                <Target className="w-3 h-3" />
+                                间接相关
+                              </span>
+                            )}
+                            {/* 热度综合指标 */}
+                            <span className={cn("flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 font-medium", heat.color)}>
+                              <ThermometerSun className="w-3 h-3" />
+                              {heat.label} {heatScore}
+                            </span>
                           </div>
                           
                           {/* Title */}
@@ -551,24 +655,152 @@ function App() {
                             {hotspot.title}
                           </h3>
                           
-                          {/* Summary */}
+                          {/* AI Summary - 标注 */}
                           {hotspot.summary && (
-                            <p className="text-sm text-slate-500 line-clamp-2 mb-3">{hotspot.summary}</p>
+                            <div className="mb-3">
+                              <span className="text-[10px] text-blue-400/60 font-medium mr-1.5">AI 摘要</span>
+                              <span className="text-sm text-slate-500">{hotspot.summary}</span>
+                            </div>
+                          )}
+
+                          {/* 作者信息 */}
+                          {hotspot.authorName && (
+                            <div className="flex items-center gap-2 mb-3">
+                              {hotspot.authorAvatar ? (
+                                <img src={hotspot.authorAvatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                              ) : (
+                                <User className="w-4 h-4 text-slate-600" />
+                              )}
+                              <span className="text-xs text-slate-400">
+                                {hotspot.authorName}
+                                {hotspot.authorUsername && <span className="text-slate-600 ml-1">@{hotspot.authorUsername}</span>}
+                              </span>
+                              {hotspot.authorVerified && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">✓ 认证</span>
+                              )}
+                              {hotspot.authorFollowers != null && hotspot.authorFollowers > 0 && (
+                                <span className="text-[10px] text-slate-600">{hotspot.authorFollowers.toLocaleString()} 粉丝</span>
+                              )}
+                            </div>
                           )}
                           
-                          {/* Stats */}
-                          <div className="flex items-center gap-4 text-xs text-slate-600">
+                          {/* 互动数据 */}
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 mb-2">
                             <span className="flex items-center gap-1">
-                              <Eye className="w-3.5 h-3.5" />
+                              <Target className="w-3.5 h-3.5" />
                               相关性 {hotspot.relevance}%
                             </span>
                             {hotspot.likeCount != null && hotspot.likeCount > 0 && (
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1" title="点赞">
                                 <Zap className="w-3.5 h-3.5" />
                                 {hotspot.likeCount.toLocaleString()}
                               </span>
                             )}
+                            {hotspot.retweetCount != null && hotspot.retweetCount > 0 && (
+                              <span className="flex items-center gap-1" title="转发">
+                                <Repeat2 className="w-3.5 h-3.5" />
+                                {hotspot.retweetCount.toLocaleString()}
+                              </span>
+                            )}
+                            {hotspot.replyCount != null && hotspot.replyCount > 0 && (
+                              <span className="flex items-center gap-1" title="回复">
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                {hotspot.replyCount.toLocaleString()}
+                              </span>
+                            )}
+                            {hotspot.commentCount != null && hotspot.commentCount > 0 && (
+                              <span className="flex items-center gap-1" title="评论">
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                {hotspot.commentCount.toLocaleString()}
+                              </span>
+                            )}
+                            {hotspot.quoteCount != null && hotspot.quoteCount > 0 && (
+                              <span className="flex items-center gap-1" title="引用">
+                                <Quote className="w-3.5 h-3.5" />
+                                {hotspot.quoteCount.toLocaleString()}
+                              </span>
+                            )}
+                            {hotspot.viewCount != null && hotspot.viewCount > 0 && (
+                              <span className="flex items-center gap-1" title="浏览量">
+                                <Eye className="w-3.5 h-3.5" />
+                                {hotspot.viewCount.toLocaleString()}
+                              </span>
+                            )}
+                            {hotspot.danmakuCount != null && hotspot.danmakuCount > 0 && (
+                              <span className="flex items-center gap-1" title="弹幕">
+                                💬 {hotspot.danmakuCount.toLocaleString()}
+                              </span>
+                            )}
                           </div>
+
+                          {/* 时间信息 */}
+                          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
+                            {hotspot.publishedAt && (
+                              <span className="flex items-center gap-1" title={`发布于 ${formatDateTime(hotspot.publishedAt)}`}>
+                                <Clock className="w-3 h-3" />
+                                发布 {relativeTime(hotspot.publishedAt)}
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1" title={`抓取于 ${formatDateTime(hotspot.createdAt)}`}>
+                              <Activity className="w-3 h-3" />
+                              抓取 {relativeTime(hotspot.createdAt)}
+                            </span>
+                          </div>
+
+                          {/* AI 相关性理由 - 可折叠 */}
+                          {hotspot.relevanceReason && (
+                            <div className="mt-2">
+                              <button
+                                onClick={() => toggleReason(hotspot.id)}
+                                className="flex items-center gap-1 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
+                              >
+                                {expandedReasons.has(hotspot.id) ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                AI 分析理由
+                              </button>
+                              <AnimatePresence>
+                                {expandedReasons.has(hotspot.id) && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <p className="text-xs text-slate-500 mt-1 pl-4 border-l-2 border-blue-500/20">
+                                      {hotspot.relevanceReason}
+                                    </p>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          )}
+
+                          {/* 原始内容 - 可折叠 */}
+                          {hotspot.content && hotspot.content !== hotspot.summary && (
+                            <div className="mt-2">
+                              <button
+                                onClick={() => toggleContent(hotspot.id)}
+                                className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"
+                              >
+                                {expandedContents.has(hotspot.id) ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                <FileText className="w-3 h-3" />
+                                原始内容
+                              </button>
+                              <AnimatePresence>
+                                {expandedContents.has(hotspot.id) && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <p className="text-xs text-slate-500 mt-1 pl-4 border-l-2 border-white/10 whitespace-pre-wrap break-words max-h-40 overflow-y-auto">
+                                      {hotspot.content}
+                                    </p>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          )}
                         </div>
                         
                         {/* Link */}
@@ -583,7 +815,8 @@ function App() {
                         </a>
                       </div>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -786,7 +1019,10 @@ function App() {
                   <p className="text-sm text-slate-600 mt-1">尝试调整筛选条件</p>
                 </div>
               )}
-              {filteredSearchResults.map((hotspot, i) => (
+              {filteredSearchResults.map((hotspot, i) => {
+                const heatScore = calcHeatScore(hotspot);
+                const heat = getHeatLevel(heatScore);
+                return (
                 <motion.div 
                   key={hotspot.id} 
                   initial={{ opacity: 0, y: 10 }}
@@ -795,24 +1031,73 @@ function App() {
                   className="group p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 transition-all"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
                         <span className={cn(
-                          "px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase",
-                          hotspot.importance === 'urgent' && "bg-red-500/15 text-red-400",
-                          hotspot.importance === 'high' && "bg-orange-500/15 text-orange-400",
-                          hotspot.importance === 'medium' && "bg-amber-500/15 text-amber-400",
-                          hotspot.importance === 'low' && "bg-emerald-500/15 text-emerald-400"
+                          "px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase flex items-center",
+                          hotspot.importance === 'urgent' && "bg-red-500/15 text-red-400 border border-red-500/20",
+                          hotspot.importance === 'high' && "bg-orange-500/15 text-orange-400 border border-orange-500/20",
+                          hotspot.importance === 'medium' && "bg-amber-500/15 text-amber-400 border border-amber-500/20",
+                          hotspot.importance === 'low' && "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                         )}>
-                          {hotspot.importance}
+                          {getImportanceIcon(hotspot.importance)}
+                          <span className="ml-1">{hotspot.importance}</span>
                         </span>
                         <span className="flex items-center gap-1 text-xs text-slate-600">
                           {getSourceIcon(hotspot.source)}
                           {getSourceLabel(hotspot.source)}
                         </span>
+                        {!hotspot.isReal && (
+                          <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20">
+                            <ShieldAlert className="w-3 h-3" />
+                            可疑
+                          </span>
+                        )}
+                        <span className={cn("flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 font-medium", heat.color)}>
+                          <ThermometerSun className="w-3 h-3" />
+                          {heat.label} {heatScore}
+                        </span>
                       </div>
-                      <h3 className="font-medium text-white mb-2">{hotspot.title}</h3>
-                      <p className="text-sm text-slate-500 line-clamp-2">{hotspot.content.slice(0, 200)}...</p>
+                      <h3 className="font-medium text-white mb-2 group-hover:text-blue-400 transition-colors">{hotspot.title}</h3>
+                      {hotspot.summary && (
+                        <div className="mb-2">
+                          <span className="text-[10px] text-blue-400/60 font-medium mr-1.5">AI 摘要</span>
+                          <span className="text-sm text-slate-500">{hotspot.summary}</span>
+                        </div>
+                      )}
+                      {hotspot.authorName && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <User className="w-4 h-4 text-slate-600" />
+                          <span className="text-xs text-slate-400">{hotspot.authorName}</span>
+                          {hotspot.authorVerified && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">✓ 认证</span>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                        <span className="flex items-center gap-1">
+                          <Target className="w-3.5 h-3.5" />
+                          相关性 {hotspot.relevance}%
+                        </span>
+                        {hotspot.likeCount != null && hotspot.likeCount > 0 && (
+                          <span className="flex items-center gap-1" title="点赞">
+                            <Zap className="w-3.5 h-3.5" />
+                            {hotspot.likeCount.toLocaleString()}
+                          </span>
+                        )}
+                        {hotspot.viewCount != null && hotspot.viewCount > 0 && (
+                          <span className="flex items-center gap-1" title="浏览量">
+                            <Eye className="w-3.5 h-3.5" />
+                            {hotspot.viewCount.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                      {hotspot.publishedAt && (
+                        <div className="flex items-center gap-1 text-[11px] text-slate-600 mt-1" title={formatDateTime(hotspot.publishedAt)}>
+                          <Clock className="w-3 h-3" />
+                          发布 {relativeTime(hotspot.publishedAt)}
+                        </div>
+                      )}
                     </div>
                     <a
                       href={hotspot.url}
@@ -824,7 +1109,8 @@ function App() {
                     </a>
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

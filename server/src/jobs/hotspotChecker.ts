@@ -3,7 +3,7 @@ import { prisma } from '../db.js';
 import { searchTwitter } from '../services/twitter.js';
 import { searchBing, searchHackerNews, deduplicateResults } from '../services/search.js';
 import { searchSogou, searchBilibili, searchWeibo, detectAndFetchAccount } from '../services/chinaSearch.js';
-import { analyzeContent } from '../services/ai.js';
+import { analyzeContent, expandKeyword, preMatchKeyword } from '../services/ai.js';
 import { sendHotspotEmail } from '../services/email.js';
 import type { SearchResult } from '../types.js';
 
@@ -67,6 +67,11 @@ export async function runHotspotCheck(io: Server): Promise<void> {
           console.log(`  ✅ Found ${acc.platform} account: ${acc.name} (${acc.followers} followers)`);
         }
       }
+
+      // 第 1.5 步：Query Expansion（查询扩展）
+      console.log(`  🔍 Expanding keyword "${keyword.text}"...`);
+      const expandedKeywords = await expandKeyword(keyword.text);
+      console.log(`  📋 Expanded to ${expandedKeywords.length} variants: ${expandedKeywords.slice(0, 5).join(', ')}${expandedKeywords.length > 5 ? '...' : ''}`);
 
       // 第二步：从多个来源获取数据（国际 + 国内并行请求）
       const [
@@ -142,8 +147,10 @@ export async function runHotspotCheck(io: Server): Promise<void> {
             continue;
           }
 
-          // AI 分析
-          const analysis = await analyzeContent(item.title + '\n' + item.content);
+          // AI 分析（传入关键词和预匹配结果）
+          const fullText = item.title + '\n' + item.content;
+          const preMatch = preMatchKeyword(fullText, expandedKeywords);
+          const analysis = await analyzeContent(fullText, keyword.text, preMatch);
 
           // 只保存真实且相关的热点
           if (!analysis.isReal) {
@@ -151,8 +158,15 @@ export async function runHotspotCheck(io: Server): Promise<void> {
             continue;
           }
 
-          if (analysis.relevance < 40) {
+          // 相关性阈值：50 分以下过滤
+          if (analysis.relevance < 50) {
             console.log(`  ⏭ Low relevance (${analysis.relevance}): ${item.title.slice(0, 30)}...`);
+            continue;
+          }
+
+          // 额外规则：关键词未被提及且相关性不足 65 → 过滤
+          if (!analysis.keywordMentioned && analysis.relevance < 65) {
+            console.log(`  ⏭ Keyword not mentioned & relevance < 65 (${analysis.relevance}): ${item.title.slice(0, 30)}...`);
             continue;
           }
 
@@ -166,11 +180,22 @@ export async function runHotspotCheck(io: Server): Promise<void> {
               sourceId: item.sourceId || null,
               isReal: analysis.isReal,
               relevance: analysis.relevance,
+              relevanceReason: analysis.relevanceReason || null,
+              keywordMentioned: analysis.keywordMentioned ?? null,
               importance: analysis.importance,
               summary: analysis.summary,
               viewCount: item.viewCount || null,
               likeCount: item.likeCount || null,
               retweetCount: item.retweetCount || null,
+              replyCount: item.replyCount || null,
+              commentCount: item.commentCount || null,
+              quoteCount: item.quoteCount || null,
+              danmakuCount: item.danmakuCount || null,
+              authorName: item.author?.name || null,
+              authorUsername: item.author?.username || null,
+              authorAvatar: item.author?.avatar || null,
+              authorFollowers: item.author?.followers || null,
+              authorVerified: item.author?.verified ?? null,
               publishedAt: item.publishedAt || null,
               keywordId: keyword.id
             },

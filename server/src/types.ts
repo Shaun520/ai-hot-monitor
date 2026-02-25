@@ -8,6 +8,8 @@ export interface SearchResult {
   viewCount?: number;
   likeCount?: number;
   retweetCount?: number;
+  replyCount?: number; // Twitter 回复数
+  quoteCount?: number; // Twitter 引用数
   score?: number; // Hacker News score
   commentCount?: number; // Hacker News / Bilibili comments
   danmakuCount?: number; // Bilibili 弹幕数
@@ -32,8 +34,10 @@ export interface TwitterFilterConfig {
 export interface AIAnalysis {
   isReal: boolean;
   relevance: number;
+  relevanceReason: string; // AI 判断相关性的理由
+  keywordMentioned: boolean; // 内容中是否直接提及了关键词或其核心概念
   importance: 'low' | 'medium' | 'high' | 'urgent';
-  summary: string;
+  summary: string; // 与关键词的关联说明（不是单纯的内容介绍）
 }
 
 export interface HotspotWithKeyword {
@@ -45,11 +49,22 @@ export interface HotspotWithKeyword {
   sourceId: string | null;
   isReal: boolean;
   relevance: number;
+  relevanceReason: string | null;
+  keywordMentioned: boolean | null;
   importance: string;
   summary: string | null;
   viewCount: number | null;
   likeCount: number | null;
   retweetCount: number | null;
+  replyCount: number | null;
+  commentCount: number | null;
+  quoteCount: number | null;
+  danmakuCount: number | null;
+  authorName: string | null;
+  authorUsername: string | null;
+  authorAvatar: string | null;
+  authorFollowers: number | null;
+  authorVerified: boolean | null;
   publishedAt: Date | null;
   createdAt: Date;
   keywordId: string | null;

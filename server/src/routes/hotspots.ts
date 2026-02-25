@@ -223,7 +223,7 @@ router.post('/search', async (req, res) => {
     const analyzedResults = await Promise.all(
       results.slice(0, 10).map(async (item) => {
         try {
-          const analysis = await analyzeContent(item.title + ' ' + item.content);
+          const analysis = await analyzeContent(item.title + ' ' + item.content, query);
           return { ...item, analysis };
         } catch {
           return { ...item, analysis: null };

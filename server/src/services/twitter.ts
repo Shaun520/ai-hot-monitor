@@ -195,6 +195,8 @@ export async function searchTwitter(query: string): Promise<SearchResult[]> {
       viewCount: tweet.viewCount,
       likeCount: tweet.likeCount,
       retweetCount: tweet.retweetCount,
+      replyCount: tweet.replyCount,
+      quoteCount: tweet.quoteCount,
       author: {
         name: tweet.author.name,
         username: tweet.author.userName,
@@ -239,6 +241,8 @@ export async function getUserTweets(username: string): Promise<SearchResult[]> {
       viewCount: tweet.viewCount,
       likeCount: tweet.likeCount,
       retweetCount: tweet.retweetCount,
+      replyCount: tweet.replyCount,
+      quoteCount: tweet.quoteCount,
       author: {
         name: tweet.author.name,
         username: tweet.author.userName,
