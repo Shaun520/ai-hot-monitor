@@ -1,70 +1,152 @@
-# 🔥 AI Hot Monitor — AI 热点监控工具
+# AI 热点监控工具
 
-> 自动发现热点、AI 智能分析真假与价值、多渠道实时推送通知
+> 作者：[张三](https://yuyuanweb.feishu.cn/wiki/Abldw5WkjidySxkKxU2cQdAtnah)
+>
+> 本项目为教学项目，提供完整视频教程 + 文字教程 + 简历写法 + 面试题解 + 答疑服务，帮你提升项目能力，给简历增加亮点！
+>
+> ⭐️ 加入项目系列学习：[加入编程导航](https://www.codefather.cn/vip)
 
-![Tech Stack](https://img.shields.io/badge/React-19-blue?logo=react)
-![Tech Stack](https://img.shields.io/badge/Express-5-green?logo=express)
-![Tech Stack](https://img.shields.io/badge/Prisma-6-purple?logo=prisma)
-![Tech Stack](https://img.shields.io/badge/SQLite-lightgrey?logo=sqlite)
-![Tech Stack](https://img.shields.io/badge/Socket.io-4-black?logo=socket.io)
 
-## 📋 项目简介
 
-作为 AI 编程博主，需要第一时间获取 AI 领域的热点信息（如大模型更新、行业动态等）。本工具实现了：
+## 一、项目介绍
 
-- **关键词监控** — 添加关键词，系统每 30 分钟自动检索多个数据源
-- **AI 智能分析** — 利用 OpenRouter AI 判断信息真假、分析热点价值与相关性
-- **多源聚合** — 同时抓取 Bing 搜索、中文搜索引擎和 Twitter/X 的数据
-- **实时通知** — 通过 WebSocket 浏览器推送 + 邮件通知，第一时间获知热点
-- **赛博朋克风 UI** — 暗色数据仪表盘，动效丰富、响应式设计
+这是一套以 **AI 编程实战** 为核心的项目教程，基于 Express 5 + React 19 + OpenRouter + Socket.io，用 AI 编程的方式从 0 到 1 开发一个《AI 热点监控工具》，带你亲身体验 AI Vibe Coding 的完整工作流，学会用 AI 快速做出实用的提效工具！
 
-## 🛠️ 技术栈
+![](https://img.example.invalid/1/image-20260304102630302.png)
 
-| 层级 | 技术 |
-|------|------|
-| 前端 | React 19 + Vite 7 + TailwindCSS 4 + Framer Motion |
-| 后端 | Node.js + Express 5 + TypeScript |
-| 数据库 | SQLite + Prisma ORM |
-| AI | OpenRouter API（支持多种模型） |
-| 实时通信 | Socket.io |
-| 定时任务 | node-cron（每 30 分钟） |
-| 邮件 | Nodemailer（SMTP） |
-| 搜索 | Bing/中文搜索爬虫 + Twitter API |
+输入要监控的关键词，系统自动从 Twitter、Bing、HackerNews、搜狗、B 站等 **8+** 个信息源聚合抓取内容，利用 AI 进行真假识别和相关性分析，并通过 WebSocket 实时推送和邮件通知用户。此外，还将热点监控能力封装为 **Agent Skills 技能包**，让 Cursor、VSCode Copilot、Claude Code 等 AI 编程工具也能直接使用。
 
-## 📁 项目结构
 
-```
-ai-hot-monitor/
-├── client/                  # 前端（React + Vite）
-│   └── src/
-│       ├── components/      # UI 组件（含 aceternity 风格动效）
-│       ├── services/        # API 调用 & WebSocket
-│       └── utils/           # 工具函数
-├── server/                  # 后端（Express）
-│   ├── prisma/              # 数据库 Schema & 迁移
-│   └── src/
-│       ├── routes/          # REST API 路由
-│       ├── services/        # 业务逻辑（搜索、AI、邮件）
-│       ├── jobs/            # 定时任务
-│       └── __tests__/       # 测试
-├── docs/                    # 项目文档
-│   ├── REQUIREMENTS.md      # 需求文档
-│   └── API_INTEGRATION.md   # API 集成说明
-└── skills/                  # Copilot Agent Skills
-```
 
-## 🚀 快速开始
+### 为什么做这个项目？
 
-### 前置要求
+张三作为 AI 编程博主，要利用工具第一时间自动发现最新的热点（比如 AI 大模型的更新），并且及时给我发送通知，让我能够走在吃瓜第一线。
 
-- Node.js ≥ 18
-- npm / pnpm
+既然如此，**不如做一个更通用的工具**。
 
-### 1. 克隆项目
+这就是 AI 热点监控工具的起点：让 AI 帮你盯热点，第一时间获取优质信息！
+
+![](https://img.example.invalid/1/AI%E7%83%AD%E7%82%B9%E7%9B%91%E6%8E%A7%E5%AF%B9%E8%AF%9D%E6%A1%86.jpg)
+
+
+
+### 6 大核心能力
+
+1）配置监控关键词，支持激活 / 暂停。
+
+![](https://img.example.invalid/1/image-20260304102804249.png)
+
+
+
+2）AI 自动从 8+ 数据源抓取和分析热点，利用 AI 进行查询扩展、真假识别、相关性分析和智能摘要。
+
+![](https://img.example.invalid/1/image-20260304103025682.png)
+
+
+
+3）多维度筛选和排序，按来源、重要性、时间范围筛选，按热度、相关性、时间排序。
+
+![](https://img.example.invalid/1/image-20260304103219366.png)
+
+
+
+4）全网搜索，输入关键词从多个数据源聚合搜索。
+
+![](https://img.example.invalid/1/image-20260304103824666.png)
+
+
+
+5）实时通知，WebSocket 实时推送 + 邮件通知。
+
+![](https://img.example.invalid/1/image-20260304104139285.png)
+
+
+
+6）Agent Skills 技能包，安装后在 Cursor、VSCode Copilot、Claude Code 中都能直接使用。
+
+![](https://img.example.invalid/1/1772099941189-4fb78679-12ac-4b92-a7b4-b5b4645b09d4.png)
+
+
+
+## 二、项目优势
+
+本项目选题新颖，紧跟 AI 编程时代，以 **实用工具开发** 为导向，区别于增删改查的烂大街项目。项目内容精炼，**不到一周就能学完**，带你掌握 AI 编程的完整工作流，给你的简历和求职大幅增加竞争力！
+
+技术丰富，覆盖 AI 编程全链路：
+
+![](https://img.example.invalid/1/image-20260304101227060.png)
+
+从这个项目中你可以学到：
+
+- 如何用 AI 编程从 0 到 1 开发一个完整的工具？
+- 如何安装和使用 MCP 增强 AI 能力？
+- 如何安装和使用 Agent Skills 提升 AI 编程质量？
+- 如何从多个信息源（Twitter、Bing、HN、B 站等）聚合抓取内容？
+- 如何通过 OpenRouter 接入 AI 大模型，实现智能内容审核？
+- 如何实现查询扩展（Query Expansion），提高信息检索的召回率？
+- 如何基于 Socket.io 实现 WebSocket 实时推送？
+- 如何使用 Aceternity UI 打造炫酷的科技感前端界面？
+- 如何开发标准化的 Agent Skills 技能包，并在多种 AI 工具中验证？
+- 如何在 AI 编程中进行人工确认、版本控制和迭代优化？
+
+
+
+### 张三系列项目优势
+
+张三的原创项目以 **实战** 为主，用 **全程直播** 的方式 **从 0 到 1** 带做，从需求分析、技术选型、项目设计、项目初始化、Demo 编写、前后端开发实现、项目优化、部署上线等，每个环节我都 **从理论到实践** 给大家讲的明明白白、每个细节都不放过！
+
+比起看网上的教程学习，张三项目系列的优势：从学知识 => 实践项目 => 复习笔记 => 项目答疑 => 简历写法 => 面试题解的一条龙服务
+
+![](https://img.example.invalid/1/image%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98%E7%9A%84%E4%BC%98%E5%8A%BF%E5%A4%A7.jpeg)
+
+编程导航已有 **20+ 套项目教程！** 每个项目的学习重点不同，几乎全都是前端 + 后端的 **全栈项目**，也有大量 AI 应用开发项目。
+
+详细请见：[https://codefather.cn/course](https://www.codefather.cn/course)（在该页面右侧有教程推荐和学习建议）
+
+往期项目介绍视频：[https://bilibili.com/video/BV1YvmbYbEgS](https://www.bilibili.com/video/BV1YvmbYbEgS/)
+
+张三的项目帮很多同学拿到了大厂高薪 Offer：
+
+![](https://img.example.invalid/1/coding2026%20offer%E6%8A%A5%E5%96%9C.png)
+
+
+
+## 三、更多介绍
+
+功能模块：
+
+![](https://img.example.invalid/1/image-20260304101313199.png)
+
+架构设计：
+
+![](https://img.example.invalid/1/image-20260304101440202.png)
+
+
+
+## 四、快速运行
+
+> 详细的保姆级教程请参考 [本地运行指南](docs/LOCAL_SETUP.md)
+
+### 前置条件
+
+- Node.js ≥ 18（推荐 20 LTS）
+- 一个 [OpenRouter API Key](https://openrouter.ai/settings/keys)（必需，用于 AI 分析）
+
+### 1. 克隆并安装依赖
 
 ```bash
-git clone https://github.com/your-username/ai-hot-monitor.git
+git clone https://github.com/Shaun520/ai-hot-monitor.git
 cd ai-hot-monitor
+
+# 后端
+cd server
+npm install
+npx prisma generate
+npx prisma db push
+
+# 前端
+cd ../client
+npm install
 ```
 
 ### 2. 配置环境变量
@@ -73,108 +155,48 @@ cd ai-hot-monitor
 cp server/.env.example server/.env
 ```
 
-编辑 `server/.env`，填入你的配置：
-
-```env
-# 数据库
-DATABASE_URL="file:./dev.db"
-
-# 服务器
-PORT=3001
-CLIENT_URL=http://localhost:5173
-
-# OpenRouter AI（必需）
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-
-# Twitter API（可选，twitterapi.io）
-TWITTER_API_KEY=your_twitter_api_key_here
-
-# 邮件通知（可选）
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your_email@example.com
-SMTP_PASS=your_email_password
-NOTIFY_EMAIL=notify_to@example.com
-```
-
-### 3. 安装依赖 & 初始化数据库
+编辑 `server/.env`，至少填入 OpenRouter API Key：
 
 ```bash
-# 后端
-cd server
-npm install
-npx prisma migrate dev
-
-# 前端
-cd ../client
-npm install
+OPENROUTER_API_KEY=sk-or-v1-你的key
+# Twitter API Key（可选）
+TWITTER_API_KEY=你的key
 ```
 
-### 4. 启动服务
+### 3. 启动服务（两个终端）
 
 ```bash
-# 后端（默认端口 3001）
-cd server
-npm run dev
+# 终端 1：启动后端（端口 3001）
+cd server && npm run dev
 
-# 前端（默认端口 5173）
-cd client
-npm run dev
+# 终端 2：启动前端（端口 5173）
+cd client && npm run dev
 ```
 
-打开浏览器访问 `http://localhost:5173` 即可使用。
+访问 **http://localhost:5173** ，输入关键词即可开始监控热点 🔥
 
-## 📊 核心功能
+| 服务 | 地址 |
+|------|------|
+| 前端页面 | http://localhost:5173 |
+| 后端 API | http://localhost:3001 |
+| 数据库管理 | `cd server && npx prisma studio`（可选） |
 
-### 关键词监控
+更多细节请查看 [保姆级本地运行指南](docs/LOCAL_SETUP.md)。
 
-1. 在界面中添加要监控的关键词
-2. 系统每 30 分钟自动从多个数据源搜索相关内容
-3. AI 分析内容的真实性、相关性和重要程度
-4. 满足条件时自动推送通知
 
-### 热点仪表盘
 
-- 热度综合评分（基于点赞、转发、评论等加权计算）
-- 按来源/重要性/时间范围/关键词多维过滤
-- 支持多种排序方式
-- 分页浏览历史热点
+## 加入项目学习
 
-### 多数据源
+编程导航已有 **20+ 套项目教程**！每个项目的学习重点不同，几乎全都是前端 + 后端的 **全栈** 项目，也有大量 AI 应用开发项目。
 
-| 数据源 | 方式 | 说明 |
-|--------|------|------|
-| Bing 搜索 | 网页爬虫 | 免费，无需 API Key |
-| 中文搜索 | 网页爬虫 | 国内搜索引擎聚合 |
-| Twitter/X | twitterapi.io | 需要 API Key（可选） |
+![](https://img.example.invalid/1/%25E9%25A1%25B9%25E7%259B%25AE%25E6%2595%2599%25E7%25A8%258B.png)
 
-### 通知方式
+欢迎加入 [编程导航](https://www.codefather.cn/vip)，加入后不仅可以全程跟学本项目，往期 **20+ 套原创项目教程** 也都可以无限回看。还能享受更多原创技术资料、学习和求职指导、上百场面试回放视频，开启你的编程起飞之旅~
 
-- **浏览器实时推送** — 基于 WebSocket，页面打开即可实时接收
-- **邮件通知** — 配置 SMTP 后自动发送邮件（可选）
+🧧 助力新项目学习，给大家发放 **限时编程导航优惠券**，扫码即可领券加入。加入三天内不满意可全额退款，欢迎加入体验，名额有限，速来学习！
 
-## 🧪 测试
+<img width="404" alt="image" src="https://github.com/user-attachments/assets/56411098-b60e-4267-8ba2-4ebc5d416afc" />
 
-```bash
-cd server
-npm test
-```
+1 天不到 1 块钱，绝对是对自己最值的投资！成为编程导航会员后，可以解锁 20 多套项目的教程和资料，PC 网站和 APP 都可以学习，如图：
 
-## 📝 API 端点
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/health` | 健康检查 |
-| GET/POST | `/api/keywords` | 关键词 CRUD |
-| GET | `/api/hotspots` | 热点列表（支持分页、过滤） |
-| GET | `/api/hotspots/stats` | 热点统计 |
-| POST | `/api/check-hotspots` | 手动触发热点检查 |
-| GET/POST | `/api/notifications` | 通知管理 |
-| GET/PUT | `/api/settings` | 系统设置 |
-
-详细 API 文档见 [docs/API_INTEGRATION.md](docs/API_INTEGRATION.md)。
-
-## 📄 License
-
-ISC
+![](https://img.example.invalid/1/image-20250120113756426-20250422160856746.png)
