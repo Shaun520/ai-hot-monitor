@@ -147,7 +147,3 @@ pnpm --filter server db:migrate    # 运行数据库迁移
 ## 许可证
 
 本项目基于 [MIT License](LICENSE) 开源。
-
-## 致谢
-
-项目灵感与初始架构来自 [张三](https://github.com/Shaun520) 的 [AI 热点监控工具](https://github.com/Shaun520/ai-hot-monitor) 教学项目，在此基础完成了 monorepo 工程化改造、AI 提供商扩展（阿里云百炼）与持续迭代。

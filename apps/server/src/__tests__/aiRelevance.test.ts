@@ -58,7 +58,7 @@ Anthropic CEO Dario Amodei 表示，Sonnet 4.6 是他们迄今为止最高效的
   {
     name: '直接相关：张三的 AI 导航网站更新',
     keyword: '张三的 AI 导航',
-    content: `张三的 AI 导航网站上线了全新的分类功能，新增了 50+ AI 工具推荐。
+    content: `程序员张三的 AI 导航网站上线了全新的分类功能，新增了 50+ AI 工具推荐。
 张三表示，AI 导航将持续更新，帮助开发者快速找到最合适的 AI 工具。
 新版本还支持用户收藏和评分功能。`,
     expectPass: true,
