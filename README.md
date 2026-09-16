@@ -105,7 +105,7 @@ pnpm dev
 | 服务 | 地址 |
 |------|------|
 | 前端页面 | http://localhost:5173 |
-| 后端 API | http://localhost:3001 |
+| 后端 API | http://localhost:3002 |
 
 ## 使用方法
 

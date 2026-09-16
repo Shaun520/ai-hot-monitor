@@ -76,7 +76,7 @@ cp apps/server/.env.example apps/server/.env
 DATABASE_URL="file:./dev.db"
 
 # 服务器配置（无需修改）
-PORT=3001
+PORT=3002
 CLIENT_URL=http://localhost:5173
 
 # ✅ 必填：OpenRouter AI
@@ -151,7 +151,7 @@ pnpm dev:server
 
 ```
 🔥 热点监控服务启动成功!
-📡 Server running on http://localhost:3001
+📡 Server running on http://localhost:3002
 🔌 WebSocket ready
 ⏰ Hotspot check scheduled every 30 minutes
 ```
@@ -202,7 +202,7 @@ pnpm --filter server db:generate
 
 **原因**：前端代理和后端端口不一致。
 
-**解决**：确认 `apps/server/.env` 中的 `PORT` 和 `apps/client/vite.config.ts` 中 proxy 的 target 端口一致（默认都是 `3001`）。
+**解决**：确认 `apps/server/.env` 中的 `PORT` 和 `apps/client/vite.config.ts` 中 proxy 的 target 端口一致（默认都是 `3002`）。若 3002 也被占用，可改用其他端口，两处保持一致即可。
 
 ### Q3：热点搜索没有结果
 
@@ -257,6 +257,6 @@ pnpm --filter server db:studio
 
 | 服务 | 默认端口 | 说明 |
 |------|----------|------|
-| 后端 API | 3001 | Express + Socket.io |
+| 后端 API | 3002 | Express + Socket.io |
 | 前端页面 | 5173 | Vite 开发服务器 |
 | Prisma Studio | 5555 | 数据库可视化（可选） |
