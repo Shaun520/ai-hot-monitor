@@ -77,3 +77,50 @@ body {
 /* ===== Line Clamp ===== */
 .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+/* ===== Vue <Transition> 动画类 ===== */
+
+/* 淡入上移（toast 提示）—— 通过 flex 容器居中，避免 transform 冲突 */
+.fade-slide-enter-active,
+.fade-slide-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+.fade-slide-enter-from,
+.fade-slide-leave-to { opacity: 0; transform: translateY(-20px); }
+
+/* 弹出（下拉菜单 / 通知面板） */
+.pop-enter-active,
+.pop-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.pop-enter-from,
+.pop-leave-to { opacity: 0; transform: translateY(8px) scale(0.96); }
+
+/* 高度展开/折叠（grid-template-rows 0fr -> 1fr 动画） */
+.expand-enter-active,
+.expand-leave-active { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.25s ease, opacity 0.25s ease; }
+.expand-enter-from,
+.expand-leave-to { grid-template-rows: 0fr; opacity: 0; }
+.expand-enter-from > *,
+.expand-leave-to > *,
+.expand-enter-active > *,
+.expand-leave-active > * { overflow: hidden; min-height: 0; }
+
+/* 关键词列表增删移动 */
+.kw-enter-active,
+.kw-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.kw-enter-from,
+.kw-leave-to { opacity: 0; transform: scale(0.9); }
+.kw-move { transition: transform 0.3s ease; }
+
+/* ===== 进场动画关键帧 ===== */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-left {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-fade-up   { animation: fade-up 0.5s ease both; }
+.animate-fade-left { animation: fade-left 0.5s ease both; }
+.animate-delay-0   { animation-delay: 0s; }
+.animate-delay-1   { animation-delay: 50ms; }
+.animate-delay-2   { animation-delay: 100ms; }
+.animate-delay-3   { animation-delay: 150ms; }

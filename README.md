@@ -24,7 +24,7 @@
 
 | 层级 | 技术 |
 |------|------|
-| 前端 | React 19、Vite 7、TypeScript、Tailwind CSS 4、Socket.io-client、Framer Motion |
+| 前端 | Vue 3、Vite 7、TypeScript、Tailwind CSS 4、Socket.io-client、lucide-vue-next |
 | 后端 | Express 5、TypeScript、Socket.io、node-cron |
 | 数据库 | Prisma 6 + SQLite |
 | AI | OpenAI SDK（OpenRouter / 阿里云百炼 DashScope 兼容接入） |
@@ -38,7 +38,7 @@
 ```
 ai-hot-monitor/
 ├── apps/
-│   ├── client/          # 前端应用（React 19 + Vite 7）
+│   │   ├── client/          # 前端应用（Vue 3 + Vite 7）
 │   │   └── src/
 │   ├── server/          # 后端服务（Express 5 + Prisma 6）
 │   │   ├── src/
