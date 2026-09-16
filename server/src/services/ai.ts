@@ -1,9 +1,45 @@
-import { OpenRouter } from '@openrouter/sdk';
+import OpenAI from 'openai';
 import type { AIAnalysis } from '../types.js';
 
-const openRouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY ?? ''
+// ========== AI 客户端初始化（同时支持 OpenRouter / 阿里云百炼 DashScope） ==========
+
+const AI_PROVIDER = process.env.AI_PROVIDER ?? 'openrouter';
+
+interface ProviderConfig {
+  baseURL: string;
+  apiKey: string;
+  defaultModel: string;
+}
+
+const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
+  // OpenRouter（原默认）：https://openrouter.ai/settings/keys
+  openrouter: {
+    baseURL: process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY ?? '',
+    defaultModel: 'deepseek/deepseek-v3.2',
+  },
+  // 阿里云百炼（DashScope）：AI_PROVIDER=dashscope 时使用
+  // 可配置工作空间专属域名：https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+  dashscope: {
+    baseURL: process.env.DASHSCOPE_BASE_URL ?? 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    apiKey: process.env.DASHSCOPE_API_KEY ?? '',
+    defaultModel: 'qwen3.8-flash',
+  },
+};
+
+const providerConfig = PROVIDER_CONFIGS[AI_PROVIDER] ?? PROVIDER_CONFIGS.openrouter;
+
+// 注意：OpenAI SDK 在 apiKey 为空时构造会直接抛错，这里用占位符兜底。
+// 实际未配置 Key 时不会发起请求（下方 isAiConfigured 已拦截）。
+const aiClient = new OpenAI({
+  apiKey: providerConfig.apiKey || 'sk-not-configured',
+  baseURL: providerConfig.baseURL,
 });
+
+// 当前使用的模型，可通过 AI_MODEL 覆盖（如 qwen3.8-max、kimi-k3 等）
+const AI_MODEL = process.env.AI_MODEL ?? providerConfig.defaultModel;
+
+const isAiConfigured = providerConfig.apiKey.length > 0;
 
 // ========== Query Expansion（查询扩展） ==========
 
@@ -23,15 +59,15 @@ export async function expandKeyword(keyword: string): Promise<string[]> {
   // 不管 AI 是否可用，先提取基础核心词
   const coreTerms = extractCoreTerms(keyword);
 
-  if (!process.env.OPENROUTER_API_KEY) {
+  if (!isAiConfigured) {
     const result = [keyword, ...coreTerms];
     expansionCache.set(keyword, result);
     return result;
   }
 
   try {
-    const result = await openRouter.chat.send({
-      model: 'deepseek/deepseek-v3.2',
+    const result = await aiClient.chat.completions.create({
+      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -54,7 +90,7 @@ export async function expandKeyword(keyword: string): Promise<string[]> {
         }
       ],
       temperature: 0.2,
-      maxTokens: 300
+      max_tokens: 300
     });
 
     const rawContent = result.choices[0]?.message?.content || '';
@@ -152,8 +188,8 @@ export async function analyzeContent(content: string, keyword: string, preMatchR
   // 默认预匹配结果
   const matchResult = preMatchResult ?? { matched: false, matchedTerms: [] };
 
-  if (!process.env.OPENROUTER_API_KEY) {
-    console.warn('OpenRouter API key not configured, using fallback analysis');
+  if (!isAiConfigured) {
+    console.warn('AI API key not configured, using fallback analysis');
     return {
       isReal: true,
       relevance: matchResult.matched ? 50 : 20,
@@ -167,8 +203,8 @@ export async function analyzeContent(content: string, keyword: string, preMatchR
   try {
     const prompt = buildAnalysisPrompt(keyword, matchResult);
 
-    const result = await openRouter.chat.send({
-      model: 'deepseek/deepseek-v3.2',
+    const result = await aiClient.chat.completions.create({
+      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -180,7 +216,7 @@ export async function analyzeContent(content: string, keyword: string, preMatchR
         }
       ],
       temperature: 0.2, // 降低温度，提高判断一致性
-      maxTokens: 500
+      max_tokens: 500
     });
 
     const rawContent = result.choices[0]?.message?.content || '';

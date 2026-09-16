@@ -19,7 +19,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@openrouter/sdk": "^0.5.1",
     "@prisma/client": "^6.19.2",
     "axios": "^1.13.4",
     "cheerio": "^1.1.0",
@@ -28,6 +27,7 @@
     "express": "^5.2.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.0",
+    "openai": "^7.15.0",
     "prisma": "^6.19.2",
     "socket.io": "^4.8.3",
     "uuid": "^13.0.0"
