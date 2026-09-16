@@ -132,6 +132,7 @@
 ### 前置条件
 
 - Node.js ≥ 18（推荐 20 LTS）
+- pnpm ≥ 8（`npm install -g pnpm`）
 - 一个 [OpenRouter API Key](https://openrouter.ai/settings/keys)（必需，用于 AI 分析）
 
 ### 1. 克隆并安装依赖
@@ -139,25 +140,16 @@
 ```bash
 git clone https://github.com/Shaun520/ai-hot-monitor.git
 cd ai-hot-monitor
-
-# 后端
-cd server
-npm install
-npx prisma generate
-npx prisma db push
-
-# 前端
-cd ../client
-npm install
+pnpm install
 ```
 
 ### 2. 配置环境变量
 
 ```bash
-cp server/.env.example server/.env
+cp apps/server/.env.example apps/server/.env
 ```
 
-编辑 `server/.env`，至少填入 OpenRouter API Key：
+编辑 `apps/server/.env`，至少填入 OpenRouter API Key：
 
 ```bash
 OPENROUTER_API_KEY=sk-or-v1-你的key
@@ -165,15 +157,18 @@ OPENROUTER_API_KEY=sk-or-v1-你的key
 TWITTER_API_KEY=你的key
 ```
 
-### 3. 启动服务（两个终端）
+### 3. 初始化数据库并启动服务
 
 ```bash
-# 终端 1：启动后端（端口 3001）
-cd server && npm run dev
+# 初始化数据库
+pnpm --filter server db:generate
+pnpm --filter server db:push
 
-# 终端 2：启动前端（端口 5173）
-cd client && npm run dev
+# 一条命令同时启动前后端
+pnpm dev
 ```
+
+也可以用 `pnpm dev:server` 和 `pnpm dev:client` 分别启动。
 
 访问 **http://localhost:5173** ，输入关键词即可开始监控热点 🔥
 
@@ -181,7 +176,7 @@ cd client && npm run dev
 |------|------|
 | 前端页面 | http://localhost:5173 |
 | 后端 API | http://localhost:3001 |
-| 数据库管理 | `cd server && npx prisma studio`（可选） |
+| 数据库管理 | `pnpm --filter server db:studio`（可选） |
 
 更多细节请查看 [保姆级本地运行指南](docs/LOCAL_SETUP.md)。
 

@@ -54,27 +54,28 @@ ai-hot-monitor/
 │   ├── README.md           # 项目说明
 │   ├── REQUIREMENTS.md     # 需求文档
 │   └── API.md              # API 文档
-├── server/                  # 后端服务
-│   ├── src/
-│   │   ├── routes/         # API 路由
-│   │   ├── services/       # 业务逻辑
-│   │   │   ├── search/     # 搜索服务
-│   │   │   ├── twitter/    # Twitter 服务
-│   │   │   ├── ai/         # AI 分析服务
-│   │   │   └── notify/     # 通知服务
-│   │   ├── jobs/           # 定时任务
-│   │   ├── db/             # 数据库
-│   │   └── utils/          # 工具函数
-│   ├── prisma/             # Prisma ORM
-│   └── package.json
-├── client/                  # 前端应用
-│   ├── src/
-│   │   ├── components/     # UI 组件
-│   │   ├── pages/          # 页面
-│   │   ├── hooks/          # 自定义 Hooks
-│   │   ├── services/       # API 调用
-│   │   └── styles/         # 样式
-│   └── package.json
+├── apps/                    # 应用目录（pnpm workspace）
+│   ├── server/              # 后端服务
+│   │   ├── src/
+│   │   │   ├── routes/     # API 路由
+│   │   │   ├── services/   # 业务逻辑
+│   │   │   │   ├── search/ # 搜索服务
+│   │   │   │   ├── twitter/ # Twitter 服务
+│   │   │   │   ├── ai/     # AI 分析服务
+│   │   │   │   └── notify/ # 通知服务
+│   │   │   ├── jobs/       # 定时任务
+│   │   │   ├── db/         # 数据库
+│   │   │   └── utils/      # 工具函数
+│   │   ├── prisma/         # Prisma ORM
+│   │   └── package.json
+│   └── client/              # 前端应用
+│       ├── src/
+│       │   ├── components/ # UI 组件
+│       │   ├── pages/      # 页面
+│       │   ├── hooks/      # 自定义 Hooks
+│       │   ├── services/   # API 调用
+│       │   └── styles/     # 样式
+│       └── package.json
 ├── skills/                  # Agent Skills
 │   └── SKILL.md            # 技能描述
 └── .env.example            # 环境变量模板
@@ -103,20 +104,22 @@ MONITOR_INTERVAL=1800000  # 30分钟 (毫秒)
 ## 🚀 快速开始
 
 ```bash
-# 1. 安装依赖
-cd server && npm install
-cd client && npm install
+# 1. 安装依赖（根目录执行一次即可）
+pnpm install
 
 # 2. 配置环境变量
-cp .env.example .env
+cp apps/server/.env.example apps/server/.env
 # 编辑 .env 文件填入你的 API Keys
 
 # 3. 初始化数据库
-cd server && npx prisma migrate dev
+pnpm --filter server db:generate
+pnpm --filter server db:push
 
-# 4. 启动服务
-cd server && npm run dev
-cd client && npm run dev
+# 4. 启动服务（同时启动前后端）
+pnpm dev
+# 或分别启动
+pnpm dev:server
+pnpm dev:client
 ```
 
 ## 📝 开发日志

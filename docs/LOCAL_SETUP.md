@@ -9,10 +9,10 @@
 | 工具 | 版本要求 | 检查命令 | 安装方式 |
 |------|----------|----------|----------|
 | Node.js | ≥ 18 | `node -v` | [官网下载](https://nodejs.org/en) |
-| npm | ≥ 9 | `npm -v` | 随 Node.js 一起安装 |
+| pnpm | ≥ 8 | `pnpm -v` | `npm install -g pnpm` 或 [官网下载](https://pnpm.io/installation) |
 | Git | 任意 | `git --version` | [官网下载](https://git-scm.com/) |
 
-> 💡 推荐使用 Node.js 20 LTS 版本，稳定性最好。
+> 💡 推荐使用 Node.js 20 LTS 版本，稳定性最好。本项目采用 pnpm monorepo 结构，前后端依赖统一管理。
 
 
 
@@ -66,10 +66,10 @@ OpenRouter 是一个统一的 AI 大模型接入平台，注册即可使用。
 
 ```bash
 # 复制环境变量模板
-cp server/.env.example server/.env
+cp apps/server/.env.example apps/server/.env
 ```
 
-用任意文本编辑器打开 `server/.env` 文件，填入你的 API Key：
+用任意文本编辑器打开 `apps/server/.env` 文件，填入你的 API Key：
 
 ```env
 # 数据库（无需修改）
@@ -100,21 +100,15 @@ NOTIFY_EMAIL=接收通知的邮箱@example.com
 
 ## 第四步：安装依赖
 
-打开终端，分别安装前后端依赖：
+在项目根目录执行一次即可（pnpm workspace 会自动安装前后端所有依赖）：
 
 ```bash
-# 安装后端依赖
-cd server
-npm install
-
-# 安装前端依赖
-cd ../client
-npm install
+pnpm install
 ```
 
-> 💡 如果 npm install 速度慢，可以先切换为国内镜像：
+> 💡 如果 pnpm install 速度慢，可以先切换为国内镜像：
 > ```bash
-> npm config set registry https://registry.npmmirror.com
+> pnpm config set registry https://registry.npmmirror.com
 > ```
 
 
@@ -122,9 +116,8 @@ npm install
 ## 第五步：初始化数据库
 
 ```bash
-cd server
-npx prisma generate
-npx prisma db push
+pnpm --filter server db:generate
+pnpm --filter server db:push
 ```
 
 执行成功后，你会看到类似输出：
@@ -134,19 +127,24 @@ npx prisma db push
 🚀 Your database is now in sync with your Prisma schema.
 ```
 
-> 💡 项目使用 SQLite 数据库，不需要额外安装数据库软件，Prisma 会自动在 `server/prisma/` 目录下创建 `dev.db` 文件。
+> 💡 项目使用 SQLite 数据库，不需要额外安装数据库软件，Prisma 会自动在 `apps/server/prisma/` 目录下创建 `dev.db` 文件。
 
 
 
 ## 第六步：启动项目
 
-需要同时启动后端和前端，**打开两个终端窗口**：
+方式一：在项目根目录一条命令同时启动前后端：
+
+```bash
+pnpm dev
+```
+
+方式二：分别启动（需要打开两个终端窗口）：
 
 **终端 1 — 启动后端：**
 
 ```bash
-cd server
-npm run dev
+pnpm dev:server
 ```
 
 看到以下输出表示后端启动成功：
@@ -161,8 +159,7 @@ npm run dev
 **终端 2 — 启动前端：**
 
 ```bash
-cd client
-npm run dev
+pnpm dev:client
 ```
 
 看到以下输出表示前端启动成功：
@@ -197,17 +194,15 @@ VITE v7.x.x ready in xxx ms
 
 **解决**：重新安装依赖：
 ```bash
-cd server
-rm -rf node_modules
-npm install
-npx prisma generate
+pnpm install
+pnpm --filter server db:generate
 ```
 
 ### Q2：前端页面打开后显示空白 / 接口报错
 
 **原因**：前端代理和后端端口不一致。
 
-**解决**：确认 `server/.env` 中的 `PORT` 和 `client/vite.config.ts` 中 proxy 的 target 端口一致（默认都是 `3001`）。
+**解决**：确认 `apps/server/.env` 中的 `PORT` 和 `apps/client/vite.config.ts` 中 proxy 的 target 端口一致（默认都是 `3001`）。
 
 ### Q3：热点搜索没有结果
 
@@ -232,8 +227,8 @@ npx prisma generate
 node -v
 
 # 重新生成 Prisma Client
-npx prisma generate
-npx prisma db push
+pnpm --filter server db:generate
+pnpm --filter server db:push
 ```
 
 ### Q6：Windows 系统运行终端命令报错
@@ -243,8 +238,7 @@ npx prisma db push
 ### Q7：如何查看数据库中的数据？
 
 ```bash
-cd server
-npx prisma studio
+pnpm --filter server db:studio
 ```
 
 浏览器会自动打开 Prisma Studio（默认 http://localhost:5555），可以可视化查看和编辑数据库内容。
@@ -255,7 +249,7 @@ npx prisma studio
 
 在各终端窗口按 `Ctrl + C` 即可停止前后端服务。
 
-数据库文件（`server/prisma/dev.db`）会保留，下次启动时数据不会丢失。
+数据库文件（`apps/server/prisma/dev.db`）会保留，下次启动时数据不会丢失。
 
 
 

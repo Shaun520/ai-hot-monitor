@@ -1,0 +1,12 @@
+{
+  "name": "ai-hot-monitor",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:client": "pnpm --filter client dev",
+    "dev:server": "pnpm --filter server dev",
+    "build": "pnpm -r build",
+    "test": "pnpm --filter server test"
+  }
+}
