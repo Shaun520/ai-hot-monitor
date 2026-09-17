@@ -166,12 +166,11 @@ function resetFilters() {
       </div>
     </div>
 
-    <!-- 展开的筛选面板 -->
+    <!-- 展开的筛选面板。
+         这里的根节点不设 overflow-hidden：展开动画的裁剪已由 CSS 中的
+         .expand-*-active > * 承担，否则绝对定位的下拉面板会被裁掉 -->
     <Transition name="expand">
-      <div
-        v-if="showFilters"
-        class="overflow-hidden"
-      >
+      <div v-if="showFilters">
         <div class="flex items-center gap-2 flex-wrap p-3 rounded-xl bg-white/[0.02] border border-white/5">
           <Dropdown
             label="来源"
